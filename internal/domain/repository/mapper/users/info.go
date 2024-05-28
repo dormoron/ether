@@ -75,3 +75,9 @@ func (mapper *UserInfoMapper) FindByEmail(ctx context.Context, email string) (Us
 	err := mapper.db.WithContext(ctx).Where("email=?", email).First(&u).Error
 	return u, err
 }
+
+func (mapper *UserInfoMapper) FindByDisable(ctx context.Context, disable bool) ([]UserInfo, error) {
+	var u []UserInfo
+	err := mapper.db.WithContext(ctx).Where("is_disable=?", disable).Find(&u).Error
+	return u, err
+}

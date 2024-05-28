@@ -10,7 +10,5 @@ func InitTable(db *gorm.DB) error {
 		&users.UserInfo{},
 		&users.UserAuth{},
 		&users.Role{},
-		&users.Permission{},
-		&users.UserRole{},
-		&users.RolePermission{})
+		&users.UserRole{})
 }
