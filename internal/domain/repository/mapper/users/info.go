@@ -10,6 +10,7 @@ import (
 var (
 	ErrDuplicateEmail = errors.New("邮箱冲突")
 	ErrUpdateData     = errors.New("更新数据失败")
+	ErrUserNotFound   = gorm.ErrRecordNotFound
 )
 
 type UserInfoMapper struct {
@@ -22,7 +23,7 @@ func NewUserInfoMapper(db *gorm.DB) *UserInfoMapper {
 	}
 }
 
-func (mapper *UserInfoMapper) Insert(ctx context.Context, u UserInfo) error {
+func (mapper *UserInfoMapper) Insert(ctx context.Context, u Info) error {
 	err := mapper.db.WithContext(ctx).Create(&u).Error
 	var me *mysql.MySQLError
 	if errors.As(err, &me) {
@@ -34,7 +35,7 @@ func (mapper *UserInfoMapper) Insert(ctx context.Context, u UserInfo) error {
 	return err
 }
 
-func (mapper *UserInfoMapper) UpdateById(ctx context.Context, u UserInfo) error {
+func (mapper *UserInfoMapper) UpdateById(ctx context.Context, u Info) error {
 	res := mapper.db.Model(&u).WithContext(ctx).
 		Where("id =?", u.Id).
 		Updates(map[string]any{
@@ -54,7 +55,7 @@ func (mapper *UserInfoMapper) UpdateById(ctx context.Context, u UserInfo) error 
 	return nil
 }
 
-func (mapper *UserInfoMapper) Disable(ctx context.Context, u UserInfo) error {
+func (mapper *UserInfoMapper) Disable(ctx context.Context, u Info) error {
 	res := mapper.db.Model(&u).WithContext(ctx).
 		Where("id =?", u.Id).
 		Updates(map[string]any{
@@ -70,14 +71,14 @@ func (mapper *UserInfoMapper) Disable(ctx context.Context, u UserInfo) error {
 	return nil
 }
 
-func (mapper *UserInfoMapper) FindByEmail(ctx context.Context, email string) (UserInfo, error) {
-	var u UserInfo
+func (mapper *UserInfoMapper) FindByEmail(ctx context.Context, email string) (Info, error) {
+	var u Info
 	err := mapper.db.WithContext(ctx).Where("email=?", email).First(&u).Error
 	return u, err
 }
 
-func (mapper *UserInfoMapper) FindByDisable(ctx context.Context, disable bool) ([]UserInfo, error) {
-	var u []UserInfo
+func (mapper *UserInfoMapper) FindByDisable(ctx context.Context, disable bool) ([]Info, error) {
+	var u []Info
 	err := mapper.db.WithContext(ctx).Where("is_disable=?", disable).Find(&u).Error
 	return u, err
 }

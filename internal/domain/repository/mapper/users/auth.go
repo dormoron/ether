@@ -17,7 +17,7 @@ func NewUserAuthMapper(db *gorm.DB) *UserAuthMapper {
 	}
 }
 
-func (mapper *UserAuthMapper) Insert(ctx context.Context, a UserAuth) error {
+func (mapper *UserAuthMapper) Insert(ctx context.Context, a Auth) error {
 	err := mapper.db.WithContext(ctx).Create(&a).Error
 	var me *mysql.MySQLError
 	if errors.As(err, &me) {
@@ -29,6 +29,12 @@ func (mapper *UserAuthMapper) Insert(ctx context.Context, a UserAuth) error {
 	return err
 }
 
+func (mapper *UserAuthMapper) FindByUsername(ctx context.Context, username string) (Auth, error) {
+	var u Auth
+	err := mapper.db.WithContext(ctx).Where("phone = ?", username).First(&u).Error
+	return u, err
+}
+
 func (mapper *UserAuthMapper) Delete(ctx context.Context, id string) error {
-	return mapper.db.WithContext(ctx).Where("id = ?", id).Delete(&UserAuth{}).Error
+	return mapper.db.WithContext(ctx).Where("id = ?", id).Delete(&Auth{}).Error
 }
