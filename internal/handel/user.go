@@ -31,6 +31,11 @@ func NewUserHandler(svc users.AuthService) *UserHandler {
 	}
 }
 
+func (u *UserHandler) RegisterRoutes(server mist.HTTPServer) {
+	userGroup := server.Group("users")
+	userGroup.POST("/signup", u.SignUp)
+}
+
 func (u *UserHandler) SignUp(ctx *mist.Context) {
 	type SignUpReq struct {
 		Username        string `json:"username"`
