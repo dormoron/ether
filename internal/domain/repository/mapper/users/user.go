@@ -13,29 +13,29 @@ var (
 	ErrUserNotFound   = gorm.ErrRecordNotFound
 )
 
-type UserInfoMapper struct {
+type UserMapper struct {
 	db *gorm.DB
 }
 
-func NewUserInfoMapper(db *gorm.DB) *UserInfoMapper {
-	return &UserInfoMapper{
+func NewUserMapper(db *gorm.DB) *UserMapper {
+	return &UserMapper{
 		db: db,
 	}
 }
 
-func (mapper *UserInfoMapper) Insert(ctx context.Context, u Info) error {
+func (mapper *UserMapper) Insert(ctx context.Context, u User) (int64, error) {
 	err := mapper.db.WithContext(ctx).Create(&u).Error
 	var me *mysql.MySQLError
 	if errors.As(err, &me) {
 		const duplicateErr uint16 = 1062
 		if me.Number == duplicateErr {
-			return ErrDuplicateEmail
+			return 0, ErrDuplicateEmail
 		}
 	}
-	return err
+	return u.Id, err
 }
 
-func (mapper *UserInfoMapper) UpdateById(ctx context.Context, u Info) error {
+func (mapper *UserMapper) UpdateById(ctx context.Context, u User) error {
 	res := mapper.db.Model(&u).WithContext(ctx).
 		Where("id =?", u.Id).
 		Updates(map[string]any{
@@ -55,7 +55,7 @@ func (mapper *UserInfoMapper) UpdateById(ctx context.Context, u Info) error {
 	return nil
 }
 
-func (mapper *UserInfoMapper) Disable(ctx context.Context, u Info) error {
+func (mapper *UserMapper) Disable(ctx context.Context, u User) error {
 	res := mapper.db.Model(&u).WithContext(ctx).
 		Where("id =?", u.Id).
 		Updates(map[string]any{
@@ -71,14 +71,20 @@ func (mapper *UserInfoMapper) Disable(ctx context.Context, u Info) error {
 	return nil
 }
 
-func (mapper *UserInfoMapper) FindByEmail(ctx context.Context, email string) (Info, error) {
-	var u Info
+func (mapper *UserMapper) FindByEmail(ctx context.Context, email string) (User, error) {
+	var u User
 	err := mapper.db.WithContext(ctx).Where("email=?", email).First(&u).Error
 	return u, err
 }
 
-func (mapper *UserInfoMapper) FindByDisable(ctx context.Context, disable bool) ([]Info, error) {
-	var u []Info
+func (mapper *UserMapper) FindById(ctx context.Context, id int64) (User, error) {
+	var u User
+	err := mapper.db.WithContext(ctx).Where("id=?", id).First(&u).Error
+	return u, err
+}
+
+func (mapper *UserMapper) FindByDisable(ctx context.Context, disable bool) ([]User, error) {
+	var u []User
 	err := mapper.db.WithContext(ctx).Where("is_disable=?", disable).Find(&u).Error
 	return u, err
 }

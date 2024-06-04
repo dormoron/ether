@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Info struct {
+type User struct {
 	Id         int64          `gorm:"primaryKey,autoIncrement"`
 	Email      sql.NullString `gorm:"unique;comment:'email'"`
 	WebSite    string         `gorm:"comment:'个人网站'"`
@@ -21,7 +21,7 @@ type Info struct {
 
 type Auth struct {
 	Id            int64          `gorm:"primaryKey,autoIncrement"`
-	UserId        string         `gorm:"not null;comment:'用户id'"`
+	UserId        sql.NullString `gorm:"comment:'用户id'"`
 	Username      sql.NullString `gorm:"unique;comment:'用户名'"`
 	Password      string         `gorm:"comment:'密码'"`
 	LoginType     string         `gorm:"comment:'登录类型'"`

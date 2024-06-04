@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/dlclark/regexp2 v1.11.0
-	github.com/dormoron/mist v0.1.2
+	github.com/dormoron/mist v0.1.3
 	github.com/go-sql-driver/mysql v1.8.1
 	go.opentelemetry.io/otel/trace v1.26.0
 	go.uber.org/zap v1.27.0

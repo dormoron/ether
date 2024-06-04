@@ -1,4 +1,4 @@
-package handel
+package users
 
 import (
 	"errors"
@@ -11,38 +11,27 @@ import (
 
 const biz = "login"
 
-type UserHandler struct {
-	svc         users.AuthService
+type AuthHandler struct {
+	svc         users.UserService
 	emailExp    *regexp.Regexp
 	passwordExp *regexp.Regexp
 }
 
-func NewUserHandler(svc users.AuthService) *UserHandler {
+func NewAuthHandler(svc users.UserService) *AuthHandler {
 	const (
 		emailRegexPattern    = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"
 		passwordRegexPattern = `^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$`
 	)
 	emailExp := regexp.MustCompile(emailRegexPattern, regexp.None)
 	passwordExp := regexp.MustCompile(passwordRegexPattern, regexp.None)
-	return &UserHandler{
+	return &AuthHandler{
 		svc:         svc,
 		emailExp:    emailExp,
 		passwordExp: passwordExp,
 	}
 }
 
-func (u *UserHandler) RegisterRoutes(server mist.HTTPServer) {
-	userGroup := server.Group("users")
-	userGroup.POST("/signup", u.SignUp)
-}
-
-func (u *UserHandler) SignUp(ctx *mist.Context) {
-	type SignUpReq struct {
-		Username        string `json:"username"`
-		ConfirmPassword string `json:"confirmPassword"`
-		Password        string `json:"password"`
-	}
-
+func (u *AuthHandler) SignUp(ctx *mist.Context) {
 	var req SignUpReq
 
 	if err := ctx.BindJSON(&req); err != nil {

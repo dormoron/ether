@@ -7,7 +7,7 @@ import (
 
 func InitTable(db *gorm.DB) error {
 	return db.AutoMigrate(
-		&users.Info{},
+		&users.User{},
 		&users.Auth{},
 		&users.Role{},
 		&users.UserRole{})

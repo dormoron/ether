@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"ether/internal/domain/model"
 	"ether/internal/domain/repository/mapper/users"
+	"strconv"
 	"time"
 )
 
@@ -24,26 +25,30 @@ func NewUserInfoRepository(mapper users.UserAuthMapper) *AuthRepository {
 }
 
 func (repo *AuthRepository) FindByUsername(ctx context.Context, username string) (model.Auth, error) {
-	u, err := repo.mapper.FindByUsername(ctx, username)
+	a, err := repo.mapper.FindByUsername(ctx, username)
 	if err != nil {
 		return model.Auth{}, err
 	}
-	return repo.entityToDomain(u), nil
+	return repo.entityToDomain(a), nil
 }
 
 func (repo *AuthRepository) Create(ctx context.Context, auth model.Auth) error {
 	return repo.mapper.Insert(ctx, repo.domainToEntity(auth))
 }
 
-func (repo *AuthRepository) domainToEntity(u model.Auth) users.Auth {
+func (repo *AuthRepository) domainToEntity(a model.Auth) users.Auth {
 	return users.Auth{
-		Id: u.Id,
-		Username: sql.NullString{
-			String: u.Username,
-			Valid:  u.Username != "",
+		Id: a.Id,
+		UserId: sql.NullString{
+			String: strconv.FormatInt(a.UserId, 10),
+			Valid:  a.UserId != 0,
 		},
-		Password:   u.Password,
-		CreateTime: u.CreateTime.UnixMilli(),
+		Username: sql.NullString{
+			String: a.Username,
+			Valid:  a.Username != "",
+		},
+		Password:   a.Password,
+		CreateTime: a.CreateTime.UnixMilli(),
 	}
 }
 
