@@ -2,20 +2,20 @@ package logger
 
 import "sync"
 
-var gl LoggerV1
+var gl Logger
 var lMutex sync.RWMutex
 
-func SetGlobalLogger(l LoggerV1) {
+func SetGlobalLogger(l Logger) {
 	lMutex.Lock()
 	defer lMutex.Unlock()
 	gl = l
 }
 
-func L() LoggerV1 {
+func L() Logger {
 	lMutex.RLock()
 	g := gl
 	lMutex.RUnlock()
 	return g
 }
 
-var GL LoggerV1 = &NopLogger{}
+var GL Logger = &NopLogger{}

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"ether/internal/domain/model"
 	"ether/internal/domain/repository/mapper/users"
-	"strconv"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -14,17 +14,24 @@ var (
 	ErrUserNotFound  = users.ErrUserNotFound
 )
 
-type AuthRepository struct {
-	mapper users.UserAuthMapper
+type AuthRepository interface {
+	FindByUsername(ctx context.Context, username string) (model.Auth, error)
+	CreateInTxn(ctx context.Context, tx *gorm.DB, auth model.Auth) error
+	domainToEntity(a model.Auth) users.Auth
+	entityToDomain(a users.Auth) model.Auth
 }
 
-func NewUserInfoRepository(mapper users.UserAuthMapper) *AuthRepository {
-	return &AuthRepository{
+type AuthRepositoryStruct struct {
+	mapper users.AuthMapper
+}
+
+func NewAuthRepository(mapper users.AuthMapper) AuthRepository {
+	return &AuthRepositoryStruct{
 		mapper: mapper,
 	}
 }
 
-func (repo *AuthRepository) FindByUsername(ctx context.Context, username string) (model.Auth, error) {
+func (repo *AuthRepositoryStruct) FindByUsername(ctx context.Context, username string) (model.Auth, error) {
 	a, err := repo.mapper.FindByUsername(ctx, username)
 	if err != nil {
 		return model.Auth{}, err
@@ -32,31 +39,28 @@ func (repo *AuthRepository) FindByUsername(ctx context.Context, username string)
 	return repo.entityToDomain(a), nil
 }
 
-func (repo *AuthRepository) Create(ctx context.Context, auth model.Auth) error {
-	return repo.mapper.Insert(ctx, repo.domainToEntity(auth))
+func (repo *AuthRepositoryStruct) CreateInTxn(ctx context.Context, tx *gorm.DB, auth model.Auth) error {
+	return repo.mapper.InsertInTxn(ctx, tx, repo.domainToEntity(auth))
 }
 
-func (repo *AuthRepository) domainToEntity(a model.Auth) users.Auth {
+func (repo *AuthRepositoryStruct) domainToEntity(a model.Auth) users.Auth {
 	return users.Auth{
-		Id: a.Id,
-		UserId: sql.NullString{
-			String: strconv.FormatInt(a.UserId, 10),
-			Valid:  a.UserId != 0,
-		},
+		UserId: a.UserId,
 		Username: sql.NullString{
 			String: a.Username,
 			Valid:  a.Username != "",
 		},
-		Password:   a.Password,
-		CreateTime: a.CreateTime.UnixMilli(),
+		Password:      a.Password,
+		LastLoginTime: time.Now(),
 	}
 }
 
-func (repo *AuthRepository) entityToDomain(a users.Auth) model.Auth {
+func (repo *AuthRepositoryStruct) entityToDomain(a users.Auth) model.Auth {
 	return model.Auth{
-		Id:         a.Id,
+		Id:         a.ID,
+		UserId:     a.UserId,
 		Username:   a.Username.String,
 		Password:   a.Password,
-		CreateTime: time.UnixMilli(a.CreateTime),
+		CreateTime: a.CreatedAt,
 	}
 }

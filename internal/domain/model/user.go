@@ -5,15 +5,15 @@ import (
 )
 
 type Auth struct {
-	Id         int64
-	UserId     int64
+	Id         uint
+	UserId     uint
 	Username   string
 	Password   string
 	CreateTime time.Time
 }
 
 type User struct {
-	Id         int64
+	Id         uint
 	Username   string
 	WebSite    string
 	Nickname   string
@@ -21,4 +21,14 @@ type User struct {
 	Intro      string
 	IsDisable  bool
 	CreateTime time.Time
+}
+
+type Role struct {
+	Id          uint
+	Name        string
+	Description string
+	IsDefault   bool
+	IsDisable   bool
+	UpdateTime  time.Time
+	CreateTime  time.Time
 }
