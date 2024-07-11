@@ -14,8 +14,9 @@ import (
 	"time"
 )
 
+var _ handler.Handler = (*AuthHandlerStruct)(nil)
+
 type AuthHandler interface {
-	handler.Handler
 	Login(ctx *mist.Context)
 	SignUp(ctx *mist.Context)
 	Profile(ctx *mist.Context)
@@ -68,11 +69,7 @@ func (u *AuthHandlerStruct) Logout(ctx *mist.Context) {
 }
 
 func (u *AuthHandlerStruct) Login(ctx *mist.Context) {
-	type Req struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-	var req Req
+	var req LoginRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
@@ -96,7 +93,7 @@ func (u *AuthHandlerStruct) Login(ctx *mist.Context) {
 }
 
 func (u *AuthHandlerStruct) SignUp(ctx *mist.Context) {
-	var req SignUpReq
+	var req SignUpRequest
 
 	if err := ctx.BindJSON(&req); err != nil {
 		return

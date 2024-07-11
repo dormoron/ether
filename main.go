@@ -13,7 +13,7 @@ func main() {
 }
 
 func initViperReader() {
-	viper.SetConfigFile("config/dev.yaml")
+	viper.SetConfigFile("config/dev_test.yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)

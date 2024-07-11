@@ -8,8 +8,9 @@ import (
 	"time"
 )
 
+var _ handler.Handler = (*RoleHandlerStruct)(nil)
+
 type RoleHandler interface {
-	handler.Handler
 	Insert(ctx *mist.Context)
 	Update(ctx *mist.Context)
 	Delete(ctx *mist.Context)
@@ -20,7 +21,7 @@ type RoleHandlerStruct struct {
 	svc users.RoleService
 }
 
-func (r RoleHandlerStruct) RegisterRoutes(server *mist.HTTPServer) {
+func (r *RoleHandlerStruct) RegisterRoutes(server *mist.HTTPServer) {
 	group := server.Group("/role")
 	group.GET("/detail", r.Details)
 	group.POST("/insert", r.Insert)
@@ -28,12 +29,8 @@ func (r RoleHandlerStruct) RegisterRoutes(server *mist.HTTPServer) {
 	group.POST("/update", r.Update)
 }
 
-func (r RoleHandlerStruct) Insert(ctx *mist.Context) {
-	type roleReq struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-	}
-	var req roleReq
+func (r *RoleHandlerStruct) Insert(ctx *mist.Context) {
+	var req RoleRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
@@ -48,12 +45,8 @@ func (r RoleHandlerStruct) Insert(ctx *mist.Context) {
 	_ = ctx.RespondSuccess(insert)
 }
 
-func (r RoleHandlerStruct) Update(ctx *mist.Context) {
-	type roleReq struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-	}
-	var req roleReq
+func (r *RoleHandlerStruct) Update(ctx *mist.Context) {
+	var req RoleRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
@@ -68,11 +61,8 @@ func (r RoleHandlerStruct) Update(ctx *mist.Context) {
 	_ = ctx.RespondSuccess("修改成功")
 }
 
-func (r RoleHandlerStruct) Delete(ctx *mist.Context) {
-	type roleReq struct {
-		Id uint `json:"id"`
-	}
-	var req roleReq
+func (r *RoleHandlerStruct) Delete(ctx *mist.Context) {
+	var req IdRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
@@ -83,7 +73,7 @@ func (r RoleHandlerStruct) Delete(ctx *mist.Context) {
 	_ = ctx.RespondSuccess("删除成功")
 }
 
-func (r RoleHandlerStruct) Details(ctx *mist.Context) {
+func (r *RoleHandlerStruct) Details(ctx *mist.Context) {
 	id, err := ctx.QueryValue("id").AsUint()
 	if err != nil {
 		return
